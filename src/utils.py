@@ -30,7 +30,8 @@ def extract_main_frame(video_path, output_dir):
     print(f"Extracted main frame from {total_frames} total frames.")
     
     
-def recognize_faces(image_path):
+def recognize_faces(image_name, output_dir):
+    image_path = f'/Images/main_frame/{image_name}.jpg'
     # Load the image from file
     frame = cv2.imread(image_path)
     
@@ -46,12 +47,24 @@ def recognize_faces(image_path):
     face_locations = face_recognition.face_locations(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
-    for face_location in face_locations:
-        # Draw a box around each face
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    for i, face_location in enumerate(face_locations):
+        # Extract the face location
         top, right, bottom, left = face_location
-        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
-    # Show the output image with recognized faces
-    cv2.imshow(frame)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        # Add a margin to the face location
+        margin = 30
+        top = max(0, top - margin)
+        right = min(frame.shape[1], right + margin)
+        bottom = min(frame.shape[0], bottom + margin)
+        left = max(0, left - margin)
+
+        # Crop the face from the frame
+        face_image = frame[top:bottom, left:right]
+
+        # Save the cropped face image
+        face_filename = os.path.join(output_dir, f"{image_name}_face{i+1}.jpg")
+        cv2.imwrite(face_filename, face_image)
