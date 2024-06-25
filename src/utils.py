@@ -1,5 +1,7 @@
 import cv2 
+import face_recognition
 import os
+
 def extract_main_frame(video_path, output_dir):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
@@ -26,3 +28,30 @@ def extract_main_frame(video_path, output_dir):
     
     cap.release()
     print(f"Extracted main frame from {total_frames} total frames.")
+    
+    
+def recognize_faces(image_path):
+    # Load the image from file
+    frame = cv2.imread(image_path)
+    
+    # Check if the image was loaded successfully
+    if frame is None:
+        print(f"Error: Could not load image from {image_path}")
+        return
+
+    # Convert the frame to RGB (OpenCV uses BGR by default)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # Find all face locations and face encodings in the frame
+    face_locations = face_recognition.face_locations(rgb_frame)
+    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+    for face_location in face_locations:
+        # Draw a box around each face
+        top, right, bottom, left = face_location
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+
+    # Show the output image with recognized faces
+    cv2.imshow(frame)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
