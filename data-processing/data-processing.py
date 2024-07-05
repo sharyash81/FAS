@@ -1,9 +1,8 @@
 import os
 import cv2
-import numpy as np
 import pandas as pd
 
-def extract_frames(video_path, label, output_dir, frame_rate=1):
+def extract_frames(video_path, folder_name, label, output_dir, frame_rate=15):
     cap = cv2.VideoCapture(video_path)
     frame_count = 0
     video_name = os.path.splitext(os.path.basename(video_path))[0]
@@ -14,7 +13,7 @@ def extract_frames(video_path, label, output_dir, frame_rate=1):
         if not ret:
             break
         if int(cap.get(cv2.CAP_PROP_POS_FRAMES)) % frame_rate == 0:
-            frame_name = f"{video_name}_frame_{frame_count}.jpg"
+            frame_name = f"{folder_name}_{video_name}_frame_{frame_count}.jpg"
             frame_path = os.path.join(output_dir, frame_name)
             cv2.imwrite(frame_path, frame)
             frames.append(frame_path)
@@ -39,7 +38,7 @@ def preprocess_dataset(data_dir, output_dir, label_file):
                         label = 1  # live
                     else:
                         label = 0  # spoofed
-                    frames, labels = extract_frames(video_path, label, output_dir)
+                    frames, labels = extract_frames(video_path, folder, label, output_dir)
                     all_frame_paths.extend(frames)
                     all_labels.extend(labels)
     
@@ -50,9 +49,3 @@ def preprocess_dataset(data_dir, output_dir, label_file):
     })
     label_df.to_csv(label_file, index=False)
 
-data_dir = '/content/drive/My Drive/CASIA_faceAntisp/train_release'
-output_dir = '/content/drive/My Drive/CASIA_faceAntisp/frames' 
-label_file = '/content/drive/My Drive/CASIA_faceAntisp/labels.csv'  
-
-preprocess_dataset(data_dir, output_dir, label_file)
-print("Preprocessing complete. Frames and labels are saved.")
